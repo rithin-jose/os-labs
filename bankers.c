@@ -1,85 +1,148 @@
-/*
-This is the C implementation of bankers algorithm
-written by CAC (rithin jose)
-*/
-
-#include<stdio.h>
-
-void main()
+#include <stdio.h>
+ 
+int current[5][5], maximum_claim[5][5], available[5];
+int allocation[5] = {0, 0, 0, 0, 0};
+int maxres[5], running[5], safe = 0;
+int counter = 0, i, j, exec, resources, processes, k = 1;
+ 
+int main()
 {
- int need[20][20],allo[20][20],max[20][20],available[20],i,j,n,m;
- 
- printf("Enter the no. of processes ");
- scanf("%d",&n);
- printf("Enter the no. of resources ");
- scanf("%d",&m);
- 
- //claim vector
- printf("\n\nEnter the claim vector");
- for(i=0;i<m;i++)
- {
-  scanf("%d",&available[i]); 
- }
-  printf("\n\nClaim vector\n");
+ printf("\nEnter number of processes: ");
+ scanf("%d", &processes);
 
- for(i=0;i<m;i++)
+ for (i = 0; i < processes; i++) 
  {
-  printf("%d\t",available[i]); 
+  running[i] = 1;
+  counter++;
  }
- 
- //allocation table
- printf("\n\nEnter the allocation table for the processes:\n");
- for(i=0;i<n;i++)
+
+ printf("\nEnter number of resources: ");
+ scanf("%d", &resources);
+
+ printf("\nEnter Claim Vector:");
+ for (i = 0; i < resources; i++) 
+ { 
+  scanf("%d", &maxres[i]);
+ }
+
+ printf("\nEnter Allocated Resource Table:\n");
+ for (i = 0; i < processes; i++) 
  {
-  for(j=0;j<m;j++)
+  for(j = 0; j < resources; j++) 
   {
-   scanf("%d",&allo[i][j]);
+   scanf("%d", &current[i][j]);
   }
  }
- printf("\n\nAllocation table for the processes:\n");
- for(i=0;i<n;i++)
+
+ printf("\nEnter Maximum Claim Table:\n");
+ for (i = 0; i < processes; i++) 
  {
-  for(j=0;j<m;j++)
+  for(j = 0; j < resources; j++) 
   {
-   printf("%d\t",allo[i][j]);
+   scanf("%d", &maximum_claim[i][j]);
+  }
+ }
+
+ printf("\nThe Claim Vector is: ");
+ for (i = 0; i < resources; i++) 
+ {
+  printf("\t%d", maxres[i]);
+ }
+
+ printf("\nThe Allocated Resource Table:\n");
+ for (i = 0; i < processes; i++) 
+ {
+  for (j = 0; j < resources; j++) 
+  {
+   printf("\t%d", current[i][j]);
+  } 
+  printf("\n");
+ }
+
+ printf("\nThe Maximum Claim Table:\n");
+ for (i = 0; i < processes; i++) 
+ {
+  for (j = 0; j < resources; j++) 
+  {
+   printf("\t%d", maximum_claim[i][j]);
   }
   printf("\n");
  }
- 
- //Max requirement table 
- printf("\n\nEnter the maximum requirement for the processes:\n");
- for(i=0;i<n;i++)
+
+ for (i = 0; i < processes; i++) 
  {
-  for(j=0;j<m;j++)
+  for (j = 0; j < resources; j++) 
   {
-   scanf("%d",&max[i][j]);
+   allocation[j] += current[i][j];
   }
  }
-  printf("\n\nMaximum requirement for the processes:\n");
- for(i=0;i<n;i++)
+
+ printf("\nAllocated resources:");
+ for (i = 0; i < resources; i++) 
  {
-  for(j=0;j<m;j++)
-  {
-   printf("%d\t",max[i][j]);
-  }
-  printf("\n");
+  printf("\t%d", allocation[i]);
  }
- 
- //calculation of need table
- for(i=0;i<n;i++)
+
+ for (i = 0; i < resources; i++) 
  {
-  for(j=0;j<m;j++)
-  {
-   need[i][j]=max[i][j]-allo[i][j];
-  }
+  available[i] = maxres[i] - allocation[i];
  }
-  printf("\n\nNeed of the processes\n");
- for(i=0;i<n;i++)
+
+ printf("\nAvailable resources:");
+ for (i = 0; i < resources; i++) 
  {
-  for(j=0;j<m;j++)
-  {
-   printf("%d\t",need[i][j]);
-  }
-  printf("\n");
+  printf("\t%d", available[i]);
  }
+ printf("\n");
+
+ while (counter != 0) 
+ {
+  safe = 0;
+  for (i = 0; i < processes; i++) 
+  {
+   if (running[i]) 
+   {
+    exec = 1;
+    for (j = 0; j < resources; j++) 
+    {
+     if (maximum_claim[i][j] - current[i][j] > available[j]) 
+     {
+      exec = 0;
+      break;
+     }
+    }
+   if (exec) 
+   {
+    printf("\nProcess%d is executing\n", i + 1);
+    running[i] = 0;
+    counter--;
+    safe = 1;
+
+    for (j = 0; j < resources; j++) 
+    {
+     available[j] += current[i][j];
+    }
+    break;
+    }
+   }
+  }
+  if (!safe) 
+  {
+   printf("\nThe processes are in unsafe state.\n");
+   break;
+  }  
+  else 
+  {
+   printf("\nThe process is in safe state");
+   printf("\nAvailable vector:");
+
+   for (i = 0; i < resources; i++) 
+   {
+    printf("\t%d", available[i]);
+   }
+
+   printf("\n");
+  }
+ }
+ return 0;
 }
