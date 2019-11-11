@@ -1,79 +1,72 @@
 #include<stdio.h>
 #include<string.h>
-#include<stdlib.h>
 #include<ctype.h>
-
 void main()
 {
- FILE *f1,*f2,*f3,*f4;
- char lable[20],opcode[20],rest[20],optab[20];
- int LOCCTR,starting_address,address,flag=0;
- 
- LOCCTR=0;
+FILE *fint,*ftab,*flen,*fsym;
+int op1[10],txtlen,txtlen1,i,j=0,len;
+char add[5],symadd[5],op[5],start[10],temp[30],line[20],label[20],mne[10],operand[10],symtab[10],opmne[10];
 
- f1=fopen("input.dat","r");
- f2=fopen("symtab.dat","w");
- f3=fopen("optab.dat","r");
- f4=fopen("out.dat","w");
- 
- printf("Input File\n");
- while(strcmp(opcode,"END")!=0)
- {
-  fscanf(f1,"%s %s %s",lable,opcode,rest);
-  printf("%s %s %s\n",lable,opcode,rest);
- 
-  if(strcmp(opcode,"START")==0 && strlen(rest)>0)
-  {
-   starting_address=atoi(rest);
-   address=starting_address;
-   LOCCTR=starting_address;
-  }
-  
+fint=fopen("input.txt","r");
+flen=fopen("length.txt","r");
+ftab=fopen("optab.txt","r");
+fsym=fopen("symbol.txt","r");
+fscanf(fint,"%s%s%s%s",add,label,mne,operand);
 
-  if(strcmp(opcode,"WORD")==0)
-{   address+=3;
-   LOCCTR+=3;}
-  else if(strcmp(opcode,"BYTE")==0)
- {
-   address+=1;
-   LOCCTR+=1;
+if(strcmp(mne,"START")==0)
+{
+strcpy(start,operand);
+fscanf(flen,"%d",&len);
 }
-  else if(strcmp(opcode,"RESW")==0)
-   { address+=(3*atoi(rest));
-    LOCCTR+=(3*atoi(rest));}
-  else if(strcmp(opcode,"RESB")==0)
-{   address+=atoi(rest);
-   LOCCTR+=atoi(rest);}
-  else if(strcmp(opcode,"START")==0)
-{   address=address;
-   LOCCTR+=address;}
-  else
-{   address+=3;
-   LOCCTR+=address;
-}
-  fprintf(f4,"%d %s %s\n",address,opcode,rest);
-  
-  if(strcmp(lable,"**")==0)
-  ;
-  else
-  {
-   fprintf(f2,"%s\n",lable);
-  }
-  
- }
-  printf("\nProcessing input file\n");
-  printf("Creating out.bat file\n");
-  printf("Creating Symtab.bat\n\n");
-  printf("output File\n"); 
-  int length;
-  length=LOCCTR-starting_address;
-  printf("length of file =",length);
-}
+printf("H^%s^%s^%d\nT^00^",label,start,len);
+fscanf(fint,"%s%s%s%s",add,label,mne,operand);
 
+while(strcmp(mne,"END")!=0)
+{
+fscanf(ftab,"%s%s",opmne,op);
+while(!feof(ftab))
+{
+if(strcmp(mne,opmne)==0)
+{
+fclose(ftab);
+fscanf(fsym,"%s%s",symadd,symtab);
+while(!feof(fsym))
+{
+if(strcmp(operand,symtab)==0)
+{
+printf("%s%s^",op,symadd);
+break;
+}
+else
+fscanf(fsym,"%s%s",symadd,symtab);
+}
+break;
+}
+else
+fscanf(ftab,"%s%s",opmne,op);
+}
+if((strcmp(mne,"BYTE")==0)||(strcmp(mne,"WORD")==0))
+{
+if(strcmp(mne,"WORD")==0)
+printf("0000%s^",operand);
+else
+{
+len=strlen(operand);
+for(i=2;i<len;i++)
+{
+printf("%d",operand[i]);
+}
+printf("^");
+}
+}
+fscanf(fint,"%s%s%s%s",add,label,mne,operand);
+ftab=fopen("optab.txt","r");
+fseek(ftab,SEEK_SET,0);
+}
+printf("\nE^00%s",start);
+fclose(fint);
+fclose(ftab);
+fclose(fsym);
+fclose(flen);
 
-/*printf("Symbol table\n");
- while(fscanf(f1,"%s",lable)!=EOF)
-  {
-   printf("%s",lable);
-  }
-  }*/
+}
